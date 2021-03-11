@@ -1,0 +1,48 @@
+- hosts: hosts
+  tasks:
+    - include: _set_vars.yml tags=always
+
+    - name: Install the package "pip"
+      apt:
+        name: python-pip
+        state: present
+      become: true
+      tags: always
+
+    - name: Install dependency python packages
+      shell: pip install mh_z19 paho-mqtt
+      become: true
+      tags: always
+
+    - name: Ensure app directory exists
+      file: path={{ app_path }} state=directory
+      tags: always
+
+    - name: Copy script
+      template: src=src/co2.py.j2 dest={{ app_path }}/co2.py
+      tags: always
+
+    - name: Set script as execute
+      file:
+        dest: "{{ app_path }}/co2.py"
+        mode: a+x
+      tags: always
+
+    - name: Enable UART
+      ansible.builtin.lineinfile:
+        path: /boot/config.txt
+        regexp: '^enable_uart='
+        line: enable_uart=1
+      become: true
+      tags: always
+
+    - name: Add to cron
+      cron:
+        name: Run CO2 script
+        minute: '*'
+        hour: '*'
+        day: '*'
+        month: '*'
+        job: "sleep 30; {{ app_path }}/co2.py"
+      become: true
+      tags: always

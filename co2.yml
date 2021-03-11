@@ -1,0 +1,2 @@
+- hosts: hosts
+- include: tasks/co2/app.yml
