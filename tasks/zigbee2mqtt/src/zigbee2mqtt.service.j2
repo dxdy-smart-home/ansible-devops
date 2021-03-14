@@ -1,0 +1,14 @@
+[Unit]
+Description=zigbee2mqtt
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/npm start
+WorkingDirectory={{ app_path }}
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User={{ ansible_user }}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,2 @@
+- set_fact: app_path="/home/{{ ansible_user }}/zigbee2mqtt"
+- set_fact: mqtt_host="{{ ha_ip }}"

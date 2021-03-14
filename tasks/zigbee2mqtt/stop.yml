@@ -1,0 +1,5 @@
+- name: Stop zigbee2mqtt service
+  systemd:
+    name: zigbee2mqtt
+    state: stopped
+  become: true

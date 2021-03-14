@@ -1,0 +1,64 @@
+# Instruction from https://www.zigbee2mqtt.io/getting_started/running_zigbee2mqtt.html
+
+- hosts: hosts
+  tasks:
+    - include: _set_vars.yml
+      tags: always
+
+    - name: Install nodejs
+      shell: curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+      become: true
+      tags: install
+
+    - name: Install zigbee2mqtt dependencies.
+      package:
+        name:
+          - nodejs
+          - git
+          - make
+          - g++
+          - gcc
+      become: true
+      tags: install
+
+    - name: Clone project from github
+      git:
+        repo: https://github.com/Koenkk/zigbee2mqtt.git
+        dest: "{{ app_path }}"
+        depth: 1
+        update: no
+      become: true
+      tags: install
+
+    - name: Set owner of project
+      ansible.builtin.file:
+        path: "{{ app_path }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        recurse: yes
+      become: true
+      tags: install
+
+    - name: Install node packages
+      shell: npm ci --production
+      args:
+        chdir: "{{ app_path }}"
+      tags: install
+
+    - name: Copy configuration.yml
+      template: src=src/configuration.yaml.j2 dest={{ app_path }}/data/configuration.yaml
+      tags: install
+
+    - name: Install systemd service
+      template:
+        src: src/zigbee2mqtt.service.j2
+        dest: /etc/systemd/system/zigbee2mqtt.service
+        owner: "{{ ansible_user }}"
+      become: true
+      tags: install
+
+    - include: start.yml
+      tags: start
+
+    - include: stop.yml
+      tags: stop

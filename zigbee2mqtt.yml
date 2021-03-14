@@ -1,0 +1,2 @@
+- hosts: hosts
+- include: tasks/zigbee2mqtt/app.yml
